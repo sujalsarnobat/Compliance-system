@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Compliance Evidence System</title>
+<style>
+:root {
+  --navy: #0F2D5C;
+  --blue: #1A56A0;
+  --accent: #2196F3;
+  --green: #1B7A3E;
+  --green-lt: #E8F5E9;
+  --yellow: #856A00;
+  --yellow-lt: #FFF8E1;
+  --red: #B71C1C;
+  --red-lt: #FFEBEE;
+  --grey: #F0F4FA;
+  --border: #DDE3EF;
+  --text: #1A1A2E;
+  --muted: #546E7A;
+  --card: #ffffff;
+  --sidebar-w: 220px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--grey); color: var(--text); min-height: 100vh; display: flex; }
+
+/* ─── Sidebar ─────────────────────────────────────── */
+.sidebar {
+  width: var(--sidebar-w); background: var(--navy); color: #fff;
+  display: flex; flex-direction: column; position: fixed; top: 0; left: 0; height: 100vh; z-index: 100;
+  box-shadow: 2px 0 12px rgba(0,0,0,.18);
+}
+.sidebar-logo {
+  padding: 22px 18px 14px;
+  border-bottom: 1px solid rgba(255,255,255,.1);
+}
+.sidebar-logo .logo-icon { font-size: 22px; margin-bottom: 4px; }
+.sidebar-logo h1 { font-size: 13px; font-weight: 700; letter-spacing: .3px; line-height: 1.3; }
+.sidebar-logo p { font-size: 10px; opacity: .55; margin-top: 2px; }
+.sidebar-nav { flex: 1; padding: 10px 0; overflow-y: auto; }
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 18px; cursor: pointer; font-size: 12.5px;
+  color: rgba(255,255,255,.72); border-left: 3px solid transparent;
+  transition: all .15s;
+}
+.nav-item:hover, .nav-item.active {
+  background: rgba(255,255,255,.08); color: #fff; border-left-color: var(--accent);
+}
+.nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
+.nav-section { font-size: 9.5px; letter-spacing: 1px; opacity: .4; padding: 14px 18px 5px; text-transform: uppercase; }
+.sidebar-footer {
+  padding: 12px 18px; border-top: 1px solid rgba(255,255,255,.1);
+  font-size: 10px; opacity: .45;
+}
+
+/* ─── Main ────────────────────────────────────────── */
+.main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+.topbar {
+  background: var(--card); border-bottom: 1px solid var(--border);
+  padding: 13px 24px; display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 50;
+}
+.topbar h2 { font-size: 16px; font-weight: 700; color: var(--navy); }
+.topbar-right { display: flex; gap: 10px; align-items: center; }
+.btn {
+  padding: 7px 16px; border-radius: 6px; border: none; cursor: pointer;
+  font-size: 12.5px; font-weight: 600; transition: all .15s; display: inline-flex; align-items: center; gap: 6px;
+}
+.btn-primary { background: var(--blue); color: #fff; }
+.btn-primary:hover { background: var(--navy); }
+.btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--muted); }
+.btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+.btn-danger { background: var(--red); color: #fff; }
+
+.content { flex: 1; padding: 24px; }
+
+/* ─── Tabs ────────────────────────────────────────── */
+.tab-bar {
+  display: flex; gap: 0; border-bottom: 2px solid var(--border); margin-bottom: 20px;
+}
+.tab {
+  padding: 9px 20px; cursor: pointer; font-size: 13px; font-weight: 600;
+  color: var(--muted); border-bottom: 2px solid transparent; margin-bottom: -2px;
+  transition: all .15s;
+}
+.tab.active { color: var(--blue); border-bottom-color: var(--blue); }
+.tab:hover:not(.active) { color: var(--navy); }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ─── Cards ───────────────────────────────────────── */
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 18px 20px; }
+.card-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); margin-bottom: 10px; }
+
+.kpi-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-bottom: 20px; }
+.kpi-card {
+  background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+  padding: 16px; text-align: center; position: relative; overflow: hidden;
+}
+.kpi-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--accent); }
+.kpi-val { font-size: 28px; font-weight: 800; color: var(--navy); line-height: 1; }
+.kpi-lbl { font-size: 10.5px; color: var(--muted); margin-top: 5px; font-weight: 500; }
+.kpi-trend { font-size: 10px; margin-top: 3px; font-weight: 600; }
+.kpi-trend.up { color: var(--green); }
+.kpi-trend.down { color: var(--red); }
+
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+
+/* ─── Tables ──────────────────────────────────────── */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+th { background: var(--navy); color: #fff; padding: 9px 12px; text-align: left; font-size: 11px; letter-spacing: .3px; white-space: nowrap; }
+td { padding: 8px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+tr:hover td { background: var(--grey); }
+tr:last-child td { border-bottom: none; }
+
+/* ─── Badges ──────────────────────────────────────── */
+.badge {
+  display: inline-block; padding: 2px 9px; border-radius: 20px;
+  font-size: 10.5px; font-weight: 700; white-space: nowrap;
+}
+.badge-green { background: var(--green-lt); color: var(--green); }
+.badge-yellow { background: var(--yellow-lt); color: var(--yellow); }
+.badge-red { background: var(--red-lt); color: var(--red); }
+.badge-blue { background: #E3F0FF; color: var(--blue); }
+.badge-grey { background: #ECEFF1; color: var(--muted); }
+
+/* ─── Scorecard bars ──────────────────────────────── */
+.fw-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.fw-row:last-child { border-bottom: none; }
+.fw-name { width: 80px; font-size: 12px; font-weight: 700; color: var(--navy); }
+.fw-bar-wrap { flex: 1; background: var(--grey); border-radius: 6px; height: 14px; overflow: hidden; }
+.fw-bar { height: 100%; border-radius: 6px; transition: width .8s ease; }
+.fw-score { width: 48px; font-size: 12px; font-weight: 700; text-align: right; }
+.fw-status { width: 100px; }
+
+/* ─── Filters ─────────────────────────────────────── */
+.filter-bar { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
+.filter-bar select, .filter-bar input {
+  padding: 6px 11px; border-radius: 6px; border: 1.5px solid var(--border);
+  font-size: 12px; background: var(--card); color: var(--text); outline: none;
+}
+.filter-bar select:focus, .filter-bar input:focus { border-color: var(--accent); }
+
+/* ─── Anomaly cards ───────────────────────────────── */
+.anomaly-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 18px; }
+.anomaly-card {
+  border-radius: 10px; padding: 14px; border-left: 4px solid var(--red);
+  background: var(--card); border: 1px solid var(--border); border-left-width: 4px;
+}
+.anomaly-card.critical { border-left-color: var(--red); }
+.anomaly-card.high { border-left-color: #E65100; }
+.anomaly-card.medium { border-left-color: #856A00; }
+.anomaly-card.low { border-left-color: var(--muted); }
+.anomaly-card .atype { font-size: 11px; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+.anomaly-card .acount { font-size: 24px; font-weight: 800; color: var(--red); }
+.anomaly-card .adesc { font-size: 10.5px; color: var(--muted); margin-top: 3px; }
+
+/* ─── Loading ─────────────────────────────────────── */
+.loading { text-align: center; padding: 48px; color: var(--muted); font-size: 14px; }
+.spinner { display: inline-block; width: 30px; height: 30px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .7s linear infinite; margin-bottom: 12px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ─── Alert ───────────────────────────────────────── */
+.alert { padding: 10px 14px; border-radius: 7px; font-size: 12.5px; margin-bottom: 12px; }
+.alert-info { background: #E3F2FD; color: #1565C0; border: 1px solid #90CAF9; }
+.alert-success { background: var(--green-lt); color: var(--green); border: 1px solid #A5D6A7; }
+.alert-warn { background: var(--yellow-lt); color: var(--yellow); border: 1px solid #FFE082; }
+
+/* ─── Collector log ───────────────────────────────── */
+.log-box { background: #0D1B2A; color: #A8D8A8; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 11.5px; line-height: 1.7; max-height: 340px; overflow-y: auto; }
+.log-box .log-ok { color: #69F0AE; }
+.log-box .log-err { color: #FF5252; }
+.log-box .log-info { color: #82B1FF; }
+
+/* ─── Requirement cards ───────────────────────────── */
+.req-card { border-radius: 8px; border: 1px solid var(--border); margin-bottom: 10px; overflow: hidden; }
+.req-hdr { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; cursor: pointer; }
+.req-hdr:hover { background: var(--grey); }
+.req-id { font-size: 11px; font-weight: 700; color: var(--muted); margin-right: 8px; }
+.req-text { font-size: 13px; font-weight: 600; color: var(--navy); flex: 1; }
+.req-body { padding: 12px 14px; border-top: 1px solid var(--border); display: none; font-size: 12px; }
+.req-body.open { display: block; }
+.req-meta { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 8px; color: var(--muted); font-size: 11.5px; }
+.req-meta span b { color: var(--text); }
+
+/* ─── Eval meter ──────────────────────────────────── */
+.eval-row { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
+.eval-label { width: 130px; font-size: 12.5px; font-weight: 600; color: var(--navy); }
+.eval-bar-wrap { flex: 1; background: var(--grey); border-radius: 6px; height: 18px; overflow: hidden; }
+.eval-bar { height: 100%; border-radius: 6px; display: flex; align-items: center; padding-left: 8px; font-size: 10px; font-weight: 700; color: #fff; transition: width .9s ease; }
+.eval-val { width: 50px; text-align: right; font-size: 13px; font-weight: 700; }
+.eval-verdict { padding: 12px 20px; border-radius: 8px; text-align: center; font-size: 14px; font-weight: 700; margin-top: 14px; }
+.eval-verdict.pass { background: var(--green-lt); color: var(--green); border: 1.5px solid var(--green); }
+.eval-verdict.fail { background: var(--red-lt); color: var(--red); border: 1.5px solid var(--red); }
+
+/* ─── Pagination ──────────────────────────────────── */
+.pagination { display: flex; gap: 6px; justify-content: flex-end; margin-top: 12px; }
+.page-btn { padding: 5px 11px; border: 1.5px solid var(--border); border-radius: 5px; cursor: pointer; font-size: 12px; background: var(--card); }
+.page-btn.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+.page-btn:hover:not(.active) { border-color: var(--accent); }
+</style>
+</head>
+<body>
+
+<!-- ─── Sidebar ─────────────────────────────── -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">🛡️</div>
+    <h1>Compliance Evidence System</h1>
+    <p>Automated Audit Platform</p>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Main</div>
+    <div class="nav-item active" onclick="showTab('overview')">
+      <span class="icon">📊</span> Overview
+    </div>
+    <div class="nav-item" onclick="showTab('frameworks')">
+      <span class="icon">🗂️</span> Frameworks
+    </div>
+    <div class="nav-item" onclick="showTab('evidence')">
+      <span class="icon">📋</span> Evidence
+    </div>
+    <div class="nav-section">Analysis</div>
+    <div class="nav-item" onclick="showTab('anomalies')">
+      <span class="icon">⚠️</span> Anomalies
+    </div>
+    <div class="nav-item" onclick="showTab('requirements')">
+      <span class="icon">📌</span> Requirements
+    </div>
+    <div class="nav-item" onclick="showTab('collector')">
+      <span class="icon">⚡</span> Collector
+    </div>
+    <div class="nav-section">Reports</div>
+    <div class="nav-item" onclick="showTab('evaluation')">
+      <span class="icon">🎯</span> Self-Evaluation
+    </div>
+  </nav>
+  <div class="sidebar-footer">Bluestock Fintech · v2.0</div>
+</aside>
+
+<!-- ─── Main ─────────────────────────────────── -->
+<div class="main">
+  <div class="topbar">
+    <h2 id="page-title">Compliance Overview</h2>
+    <div class="topbar-right">
+      <span id="last-updated" style="font-size:11px;color:var(--muted)"></span>
+      <button class="btn btn-primary" onclick="downloadReport()">⬇ Download PDF Report</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ── Overview Tab ─────────────────────────── -->
+    <div id="tab-overview" class="tab-panel active">
+      <div id="overview-loading" class="loading"><div class="spinner"></div><br>Loading compliance data...</div>
+      <div id="overview-content" style="display:none">
+        <!-- KPIs -->
+        <div class="kpi-grid" id="kpi-grid"></div>
+
+        <div class="grid-2">
+          <!-- Framework bars -->
+          <div class="card">
+            <div class="card-title">Framework Compliance Score</div>
+            <div id="fw-bars"></div>
+          </div>
+          <!-- Anomaly breakdown -->
+          <div class="card">
+            <div class="card-title">Anomaly Type Distribution</div>
+            <div class="table-wrap">
+              <table id="anomaly-table">
+                <thead><tr><th>Type</th><th>Count</th><th>Severity</th></tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Status breakdown -->
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-title">Evidence Status Distribution</div>
+          <div id="status-bars" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Frameworks Tab ───────────────────────── -->
+    <div id="tab-frameworks" class="tab-panel">
+      <div id="fw-loading" class="loading"><div class="spinner"></div><br>Loading framework data...</div>
+      <div id="fw-content" style="display:none">
+        <div class="table-wrap">
+          <table id="fw-table">
+            <thead><tr>
+              <th>Framework</th><th>Total Evidence</th><th>Compliant</th>
+              <th>Anomalies</th><th>Score</th><th>Critical</th><th>High</th><th>Status</th>
+            </tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Evidence Tab ─────────────────────────── -->
+    <div id="tab-evidence" class="tab-panel">
+      <div class="filter-bar">
+        <input type="text" id="ev-search" placeholder="🔍 Search evidence ID, summary, requirement..." style="flex:1;min-width:220px" oninput="filterEvidence()"/>
+        <select id="ev-framework" onchange="filterEvidence()">
+          <option value="">All Frameworks</option>
+        </select>
+        <select id="ev-status" onchange="filterEvidence()">
+          <option value="">All Statuses</option>
+          <option value="Approved">Approved</option>
+          <option value="Pending_Review">Pending Review</option>
+          <option value="Needs_Update">Needs Update</option>
+          <option value="Rejected">Rejected</option>
+        </select>
+        <label style="font-size:12px;display:flex;align-items:center;gap:5px;cursor:pointer">
+          <input type="checkbox" id="ev-anomaly-only" onchange="filterEvidence()"/> Anomalies Only
+        </label>
+      </div>
+      <div id="ev-loading" class="loading"><div class="spinner"></div><br>Loading evidence...</div>
+      <div id="ev-content" style="display:none">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:8px" id="ev-count"></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>Evidence ID</th><th>Requirement</th><th>Framework</th>
+              <th>Type</th><th>Collected</th><th>Freshness</th><th>Confidence</th>
+              <th>Status</th><th>Anomaly</th>
+            </tr></thead>
+            <tbody id="ev-tbody"></tbody>
+          </table>
+        </div>
+        <div class="pagination" id="ev-pagination"></div>
+      </div>
+    </div>
+
+    <!-- ── Anomalies Tab ────────────────────────── -->
+    <div id="tab-anomalies" class="tab-panel">
+      <div id="an-loading" class="loading"><div class="spinner"></div><br>Analyzing anomalies...</div>
+      <div id="an-content" style="display:none">
+        <div class="anomaly-grid" id="anomaly-cards"></div>
+        <div class="card">
+          <div class="card-title">Top Anomalous Evidence Records</div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr>
+                <th>Evidence ID</th><th>Requirement</th><th>Framework</th>
+                <th>Anomaly Type</th><th>Severity</th><th>Explanation</th><th>Recommended Action</th>
+              </tr></thead>
+              <tbody id="top-anomaly-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Requirements Tab ─────────────────────── -->
+    <div id="tab-requirements" class="tab-panel">
+      <div id="req-loading" class="loading"><div class="spinner"></div><br>Loading requirements...</div>
+      <div id="req-content" style="display:none">
+        <div class="alert alert-info" id="req-summary"></div>
+        <div id="req-cards"></div>
+      </div>
+    </div>
+
+    <!-- ── Collector Tab ────────────────────────── -->
+    <div id="tab-collector" class="tab-panel">
+      <div class="alert alert-info">
+        Run automated evidence collectors (simulated CloudTrail + Azure AD integrations).
+        In production, these query real APIs.
+      </div>
+      <div style="display:flex;gap:12px;margin-bottom:16px">
+        <button class="btn btn-primary" onclick="runCollector()">▶ Run All Collectors</button>
+      </div>
+      <div class="card">
+        <div class="card-title">Collection Log</div>
+        <div class="log-box" id="collector-log">Awaiting collection run...</div>
+      </div>
+      <div id="collected-evidence" style="display:none;margin-top:16px">
+        <div class="card">
+          <div class="card-title">Newly Collected Evidence</div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Evidence ID</th><th>Source</th><th>Type</th><th>Requirement</th><th>Framework</th><th>Confidence</th><th>Signed</th><th>Description</th></tr></thead>
+              <tbody id="collected-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Evaluation Tab ───────────────────────── -->
+    <div id="tab-evaluation" class="tab-panel">
+      <div id="eval-loading" class="loading"><div class="spinner"></div><br>Computing evaluation metrics...</div>
+      <div id="eval-content" style="display:none">
+        <div class="alert alert-info">
+          Anomaly detection is evaluated against ground truth from the <b>anomaly_marker</b> column in evidence_artifacts.csv.
+          Targets: Precision ≥ 70%, Recall ≥ 60%.
+        </div>
+        <div class="card" style="max-width:600px">
+          <div class="card-title">Classifier Performance</div>
+          <div id="eval-meters"></div>
+          <div id="eval-verdict"></div>
+        </div>
+        <div style="height:16px"></div>
+        <div class="card" style="max-width:400px">
+          <div class="card-title">Confusion Matrix</div>
+          <table id="confusion-matrix">
+            <thead><tr><th></th><th>Predicted Normal</th><th>Predicted Anomaly</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end .content -->
+</div><!-- end .main -->
+
+<script>
+// ─── State ────────────────────────────────────────────────────────────────────
+let globalMetrics = null;
+let currentPage = 1;
+let currentFilters = {};
+
+// ─── Tab navigation ───────────────────────────────────────────────────────────
+function showTab(name) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  event.currentTarget.classList.add('active');
+
+  const titles = {
+    overview: 'Compliance Overview',
+    frameworks: 'Framework Scorecard',
+    evidence: 'Evidence Records',
+    anomalies: 'Anomaly Analysis',
+    requirements: 'Policy Requirements',
+    collector: 'Evidence Collector',
+    evaluation: 'Self-Evaluation',
+  };
+  document.getElementById('page-title').textContent = titles[name] || name;
+
+  if (name === 'overview' && !globalMetrics) loadOverview();
+  if (name === 'frameworks' && !document.querySelector('#fw-table tbody').children.length) loadFrameworks();
+  if (name === 'evidence') loadEvidence(1);
+  if (name === 'anomalies') loadAnomalies();
+  if (name === 'requirements') loadRequirements();
+  if (name === 'evaluation') loadEvaluation();
+}
+
+// ─── Status badge ─────────────────────────────────────────────────────────────
+function statusBadge(s) {
+  const map = {
+    COMPLIANT:     ['badge-green',  '✓ Compliant'],
+    PARTIAL:       ['badge-yellow', '⚠ Partial'],
+    NON_COMPLIANT: ['badge-red',    '✗ Non-Compliant'],
+    GAP:           ['badge-red',    '✗ Gap'],
+    Approved:      ['badge-green',  'Approved'],
+    Pending_Review:['badge-yellow', 'Pending'],
+    Needs_Update:  ['badge-yellow', 'Needs Update'],
+    Rejected:      ['badge-red',    'Rejected'],
+  };
+  const [cls, label] = map[s] || ['badge-grey', s];
+  return `<span class="badge ${cls}">${label}</span>`;
+}
+
+function severityBadge(s) {
+  const map = { CRITICAL: 'badge-red', HIGH: 'badge-red', MEDIUM: 'badge-yellow', LOW: 'badge-grey', NONE: 'badge-green' };
+  return `<span class="badge ${map[s]||'badge-grey'}">${s}</span>`;
+}
+
+function freshnessBadge(days) {
+  const d = parseInt(days);
+  if (d <= 7) return `<span class="badge badge-green">${d}d</span>`;
+  if (d <= 30) return `<span class="badge badge-blue">${d}d</span>`;
+  if (d <= 90) return `<span class="badge badge-yellow">${d}d</span>`;
+  return `<span class="badge badge-red">${d}d</span>`;
+}
+
+function confBadge(c) {
+  const v = parseFloat(c);
+  const cls = v >= 0.75 ? 'badge-green' : v >= 0.65 ? 'badge-yellow' : 'badge-red';
+  return `<span class="badge ${cls}">${(v*100).toFixed(0)}%</span>`;
+}
+
+function fwBarColor(score) {
+  if (score >= 85) return '#1B7A3E';
+  if (score >= 70) return '#856A00';
+  return '#B71C1C';
+}
+
+// ─── Overview ─────────────────────────────────────────────────────────────────
+async function loadOverview() {
+  const res = await fetch('/api/metrics');
+  const data = await res.json();
+  globalMetrics = data;
+
+  const m = data.metrics;
+  document.getElementById('last-updated').textContent = '🕐 ' + m.report_generated;
+
+  // KPIs
+  const kpis = [
+    { val: m.overall_compliance_pct + '%', lbl: 'Overall Compliance', trend: '↑ from Q1', up: true },
+    { val: m.total_evidence, lbl: 'Total Evidence', trend: m.total_anomalies + ' anomalies', up: false },
+    { val: m.evidence_freshness_pct + '%', lbl: 'Evidence Fresh ≤30d', trend: 'Target: 100%', up: m.evidence_freshness_pct >= 80 },
+    { val: m.approved_pct + '%', lbl: 'Approved Evidence', trend: 'Auditor-ready', up: m.approved_pct >= 70 },
+    { val: (m.avg_confidence * 100).toFixed(0) + '%', lbl: 'Avg Confidence', trend: 'Target: ≥75%', up: m.avg_confidence >= 0.75 },
+  ];
+  document.getElementById('kpi-grid').innerHTML = kpis.map(k => `
+    <div class="kpi-card">
+      <div class="kpi-val">${k.val}</div>
+      <div class="kpi-lbl">${k.lbl}</div>
+      <div class="kpi-trend ${k.up ? 'up' : 'down'}">${k.trend}</div>
+    </div>
+  `).join('');
+
+  // Framework bars
+  const sc = data.scorecard;
+  document.getElementById('fw-bars').innerHTML = Object.values(sc).map(fw => `
+    <div class="fw-row">
+      <div class="fw-name">${fw.framework}</div>
+      <div class="fw-bar-wrap"><div class="fw-bar" style="width:${fw.compliance_score}%;background:${fwBarColor(fw.compliance_score)}"></div></div>
+      <div class="fw-score" style="color:${fwBarColor(fw.compliance_score)}">${fw.compliance_score}%</div>
+      <div class="fw-status">${statusBadge(fw.status)}</div>
+    </div>
+  `).join('');
+
+  // Anomaly table
+  const ab = m.anomaly_breakdown;
+  const sevMap = { COMPLIANCE_GAP: 'CRITICAL', REJECTED_EVIDENCE: 'CRITICAL', STALE_EVIDENCE: 'HIGH', MISSING_DOCUMENTATION: 'HIGH', LOW_CONFIDENCE_EVIDENCE: 'MEDIUM', UNREVIEWED_EVIDENCE: 'MEDIUM', INCOMPLETE_MAPPING: 'LOW' };
+  document.querySelector('#anomaly-table tbody').innerHTML = Object.entries(ab)
+    .sort((a, b) => b[1] - a[1])
+    .map(([t, c]) => `<tr>
+      <td>${t.replace(/_/g,' ')}</td>
+      <td><b>${c}</b></td>
+      <td>${severityBadge(sevMap[t]||'MEDIUM')}</td>
+    </tr>`).join('');
+
+  document.getElementById('overview-loading').style.display = 'none';
+  document.getElementById('overview-content').style.display = 'block';
+}
+
+// ─── Frameworks ───────────────────────────────────────────────────────────────
+async function loadFrameworks() {
+  const res = await fetch('/api/metrics');
+  const data = await res.json();
+  const sc = data.scorecard;
+
+  document.querySelector('#fw-table tbody').innerHTML = Object.values(sc).map(fw => `
+    <tr>
+      <td><b>${fw.framework}</b></td>
+      <td style="text-align:center">${fw.total_evidence}</td>
+      <td style="text-align:center">${fw.compliant_count}</td>
+      <td style="text-align:center">${fw.anomaly_count}</td>
+      <td style="text-align:center;font-weight:700;color:${fwBarColor(fw.compliance_score)}">${fw.compliance_score}%</td>
+      <td style="text-align:center;color:${fw.critical_issues > 0 ? 'var(--red)' : 'var(--green)'};font-weight:700">${fw.critical_issues}</td>
+      <td style="text-align:center;color:${fw.high_issues > 0 ? '#E65100' : 'var(--green)'};font-weight:700">${fw.high_issues}</td>
+      <td>${statusBadge(fw.status)}</td>
+    </tr>
+  `).join('');
+
+  document.getElementById('fw-loading').style.display = 'none';
+  document.getElementById('fw-content').style.display = 'block';
+}
+
+// ─── Evidence ─────────────────────────────────────────────────────────────────
+let evPage = 1;
+async function filterEvidence() { evPage = 1; await loadEvidence(1); }
+
+async function loadEvidence(page) {
+  evPage = page;
+  document.getElementById('ev-loading').style.display = 'block';
+  document.getElementById('ev-content').style.display = 'none';
+
+  const search = document.getElementById('ev-search').value;
+  const fw = document.getElementById('ev-framework').value;
+  const st = document.getElementById('ev-status').value;
+  const anomOnly = document.getElementById('ev-anomaly-only').checked;
+
+  const params = new URLSearchParams({ page, per_page: 50 });
+  if (search) params.set('search', search);
+  if (fw) params.set('framework', fw);
+  if (st) params.set('status', st);
+  if (anomOnly) params.set('anomaly_only', 'true');
+
+  const res = await fetch('/api/evidence?' + params);
+  const data = await res.json();
+
+  // Populate framework filter (once)
+  if (!document.getElementById('ev-framework').options.length > 1) {
+    const fwRes = await fetch('/api/frameworks');
+    const fwData = await fwRes.json();
+    fwData.frameworks.forEach(f => {
+      const opt = document.createElement('option');
+      opt.value = f; opt.textContent = f;
+      document.getElementById('ev-framework').appendChild(opt);
+    });
+  }
+
+  document.getElementById('ev-count').textContent = `Showing ${data.evidence.length} of ${data.total} records`;
+
+  document.getElementById('ev-tbody').innerHTML = data.evidence.map(ev => `
+    <tr>
+      <td><code style="font-size:11px">${ev.evidence_id}</code></td>
+      <td style="font-size:11px">${ev.requirement_id}</td>
+      <td><span class="badge badge-blue">${ev.framework}</span></td>
+      <td style="font-size:11px">${ev.evidence_type}</td>
+      <td style="font-size:11px">${ev.collection_date || ''}</td>
+      <td>${freshnessBadge(ev.freshness_days)}</td>
+      <td>${confBadge(ev.confidence_score)}</td>
+      <td>${statusBadge(ev.status)}</td>
+      <td>${ev.is_anomaly ? severityBadge(ev.severity) : '<span class="badge badge-green">✓ OK</span>'}</td>
+    </tr>
+  `).join('');
+
+  // Pagination
+  const pages = data.pages;
+  let pgHtml = '';
+  for (let p = Math.max(1, page-2); p <= Math.min(pages, page+2); p++) {
+    pgHtml += `<div class="page-btn ${p===page?'active':''}" onclick="loadEvidence(${p})">${p}</div>`;
+  }
+  document.getElementById('ev-pagination').innerHTML = `
+    <div class="page-btn" onclick="loadEvidence(${Math.max(1,page-1)})">‹</div>
+    ${pgHtml}
+    <div class="page-btn" onclick="loadEvidence(${Math.min(pages,page+1)})">›</div>
+  `;
+
+  document.getElementById('ev-loading').style.display = 'none';
+  document.getElementById('ev-content').style.display = 'block';
+}
+
+// Populate framework dropdown on load
+(async () => {
+  const fwRes = await fetch('/api/frameworks');
+  const fwData = await fwRes.json();
+  fwData.frameworks.forEach(f => {
+    const opt = document.createElement('option');
+    opt.value = f; opt.textContent = f;
+    document.getElementById('ev-framework').appendChild(opt);
+  });
+})();
+
+// ─── Anomalies ────────────────────────────────────────────────────────────────
+async function loadAnomalies() {
+  document.getElementById('an-loading').style.display = 'block';
+  document.getElementById('an-content').style.display = 'none';
+
+  const res = await fetch('/api/anomalies');
+  const data = await res.json();
+
+  const sevMap = { COMPLIANCE_GAP: 'critical', REJECTED_EVIDENCE: 'critical', STALE_EVIDENCE: 'high', MISSING_DOCUMENTATION: 'high', LOW_CONFIDENCE_EVIDENCE: 'medium', UNREVIEWED_EVIDENCE: 'medium', INCOMPLETE_MAPPING: 'low' };
+  const descMap = {
+    COMPLIANCE_GAP: 'No evidence mapped to requirement',
+    REJECTED_EVIDENCE: 'Evidence reviewed and rejected',
+    STALE_EVIDENCE: 'Evidence older than 90 days',
+    MISSING_DOCUMENTATION: 'Incomplete evidence record',
+    LOW_CONFIDENCE_EVIDENCE: 'Confidence below threshold',
+    UNREVIEWED_EVIDENCE: 'Awaiting reviewer sign-off',
+    INCOMPLETE_MAPPING: 'Framework mapping incomplete',
+  };
+
+  document.getElementById('anomaly-cards').innerHTML = data.by_type.map(t => `
+    <div class="anomaly-card ${sevMap[t.anomaly_type]||'medium'}">
+      <div class="atype">${(t.anomaly_type||'').replace(/_/g,' ')}</div>
+      <div class="acount">${t.count}</div>
+      <div class="adesc">${descMap[t.anomaly_type]||''}</div>
+    </div>
+  `).join('');
+
+  document.getElementById('top-anomaly-tbody').innerHTML = data.top_anomalies.map(ev => `
+    <tr>
+      <td><code style="font-size:11px">${ev.evidence_id}</code></td>
+      <td style="font-size:11px">${ev.requirement_id}</td>
+      <td><span class="badge badge-blue">${ev.framework}</span></td>
+      <td style="font-size:11px">${(ev.anomaly_type||'').replace(/_/g,' ')}</td>
+      <td>${severityBadge(ev.severity)}</td>
+      <td style="font-size:11px;max-width:200px">${ev.explanation||''}</td>
+      <td style="font-size:11px;max-width:180px;color:var(--muted)">${ev.recommended_action||''}</td>
+    </tr>
+  `).join('');
+
+  document.getElementById('an-loading').style.display = 'none';
+  document.getElementById('an-content').style.display = 'block';
+}
+
+// ─── Requirements ─────────────────────────────────────────────────────────────
+async function loadRequirements() {
+  document.getElementById('req-loading').style.display = 'block';
+  document.getElementById('req-content').style.display = 'none';
+
+  const res = await fetch('/api/requirements');
+  const data = await res.json();
+
+  document.getElementById('req-summary').innerHTML =
+    `<b>${data.compliant}</b> Compliant &nbsp;|&nbsp; <b>${data.partial}</b> Partial &nbsp;|&nbsp; <b>${data.gap}</b> Gaps &nbsp;|&nbsp; Total: <b>${data.total}</b> requirements`;
+
+  // Group by policy
+  const byPolicy = {};
+  data.requirements.forEach(r => {
+    if (!byPolicy[r.policy_name]) byPolicy[r.policy_name] = [];
+    byPolicy[r.policy_name].push(r);
+  });
+
+  document.getElementById('req-cards').innerHTML = Object.entries(byPolicy).map(([policy, reqs]) => `
+    <div style="margin-bottom:18px">
+      <h3 style="font-size:13px;color:var(--navy);margin-bottom:8px;padding-bottom:5px;border-bottom:2px solid var(--border)">${policy}</h3>
+      ${reqs.map((r, i) => `
+        <div class="req-card">
+          <div class="req-hdr" onclick="toggleReq('req-${r.req_id}')">
+            <span class="req-id">${r.req_id}</span>
+            <span class="req-text">${r.requirement_text}</span>
+            ${statusBadge(r.compliance_status)}
+          </div>
+          <div class="req-body" id="req-${r.req_id}">
+            <div class="req-meta">
+              <span><b>Evidence:</b> ${r.evidence_count}</span>
+              <span><b>Approved:</b> ${r.approved_evidence}</span>
+              <span><b>Avg Confidence:</b> ${(r.avg_confidence*100).toFixed(0)}%</span>
+              <span><b>Avg Freshness:</b> ${r.avg_freshness_days} days</span>
+            </div>
+            <div style="font-size:11.5px;color:var(--muted)"><b>Frameworks:</b> ${r.frameworks}</div>
+            ${r.best_evidence_ids ? `<div style="font-size:11px;margin-top:6px;color:var(--muted)"><b>Top Evidence:</b> ${r.best_evidence_ids}</div>` : ''}
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `).join('');
+
+  document.getElementById('req-loading').style.display = 'none';
+  document.getElementById('req-content').style.display = 'block';
+}
+
+function toggleReq(id) {
+  const el = document.getElementById(id);
+  el.classList.toggle('open');
+}
+
+// ─── Collector ────────────────────────────────────────────────────────────────
+async function runCollector() {
+  const logEl = document.getElementById('collector-log');
+  logEl.innerHTML = '<span class="log-info">Starting evidence collection...</span>';
+
+  const res = await fetch('/api/collect');
+  const data = await res.json();
+
+  let log = `<span class="log-info">Collection run at ${data.run_timestamp}</span>\n`;
+  log += `<span class="log-info">─────────────────────────────</span>\n`;
+
+  data.collection_log.forEach(l => {
+    const cls = l.status === 'SUCCESS' ? 'log-ok' : 'log-err';
+    log += `<span class="${cls}">[${l.status}] ${l.source}: ${l.records_collected || l.error} records at ${l.timestamp}</span>\n`;
+  });
+  log += `\n<span class="log-ok">Total collected: ${data.total_collected} records</span>`;
+  logEl.innerHTML = log;
+
+  if (data.evidence && data.evidence.length) {
+    document.getElementById('collected-evidence').style.display = 'block';
+    document.getElementById('collected-tbody').innerHTML = data.evidence.map(ev => `
+      <tr>
+        <td><code style="font-size:11px">${ev.evidence_id}</code></td>
+        <td style="font-size:11px">${ev.source_system}</td>
+        <td style="font-size:11px">${ev.evidence_type}</td>
+        <td style="font-size:11px">${ev.requirement_id}</td>
+        <td><span class="badge badge-blue">${ev.framework}</span></td>
+        <td>${confBadge(ev.confidence_score)}</td>
+        <td>${ev.signed ? '<span class="badge badge-green">✓ Signed</span>' : '<span class="badge badge-red">No</span>'}</td>
+        <td style="font-size:11px;max-width:250px">${ev.description}</td>
+      </tr>
+    `).join('');
+  }
+}
+
+// ─── Self-Evaluation ──────────────────────────────────────────────────────────
+async function loadEvaluation() {
+  document.getElementById('eval-loading').style.display = 'block';
+  document.getElementById('eval-content').style.display = 'none';
+
+  const res = await fetch('/api/metrics');
+  const data = await res.json();
+  const ev = data.eval_results;
+
+  const meters = [
+    { label: 'Precision', val: ev.precision, pct: ev.precision_pct, target: 0.70 },
+    { label: 'Recall', val: ev.recall, pct: ev.recall_pct, target: 0.60 },
+    { label: 'F1 Score', val: ev.f1_score, pct: ev.f1_pct, target: null },
+  ];
+
+  document.getElementById('eval-meters').innerHTML = meters.map(m => {
+    const color = m.target ? (m.val >= m.target ? '#1B7A3E' : '#B71C1C') : '#1A56A0';
+    return `
+      <div class="eval-row">
+        <div class="eval-label">${m.label}</div>
+        <div class="eval-bar-wrap"><div class="eval-bar" style="width:${m.val*100}%;background:${color}">${m.pct}</div></div>
+        <div class="eval-val" style="color:${color}">${m.pct}</div>
+      </div>
+    `;
+  }).join('');
+
+  const pass = ev.precision >= 0.70 && ev.recall >= 0.60;
+  document.getElementById('eval-verdict').innerHTML = `
+    <div class="eval-verdict ${pass ? 'pass' : 'fail'}">
+      ${pass ? '✓ Classifier MEETS Target (Precision ≥70%, Recall ≥60%)' : '⚠ Classifier BELOW Target — Review rules'}
+    </div>
+  `;
+
+  document.querySelector('#confusion-matrix tbody').innerHTML = `
+    <tr>
+      <td><b>Actual Normal</b></td>
+      <td>${ev.true_negatives}</td>
+      <td style="color:var(--red)">${ev.false_positives}</td>
+    </tr>
+    <tr>
+      <td><b>Actual Anomaly</b></td>
+      <td style="color:var(--yellow)">${ev.false_negatives}</td>
+      <td style="color:var(--green)">${ev.true_positives}</td>
+    </tr>
+  `;
+
+  document.getElementById('eval-loading').style.display = 'none';
+  document.getElementById('eval-content').style.display = 'block';
+}
+
+// ─── PDF Report ───────────────────────────────────────────────────────────────
+async function downloadReport() {
+  const btn = document.querySelector('.btn-primary');
+  btn.textContent = '⏳ Generating...';
+  btn.disabled = true;
+  try {
+    const res = await fetch('/api/report', { method: 'POST' });
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'compliance_audit_report.pdf';
+    a.click();
+  } finally {
+    btn.textContent = '⬇ Download PDF Report';
+    btn.disabled = false;
+  }
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+loadOverview();
+</script>
+</body>
+</html>
